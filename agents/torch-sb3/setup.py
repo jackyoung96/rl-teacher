@@ -13,6 +13,6 @@ setup(name='torchSB3',
         'gym[mujoco] ~=0.26.2',
         'multiprocess ~=0.70.5',
         'torch ~=1.13.1',
-        'stable-baselines3 ~=1.6.2',
+        'stable-baselines3',
     ],
 )

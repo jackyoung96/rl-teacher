@@ -2,7 +2,7 @@ import stable_baselines3 as SB3
 import gym
 import os
 import multiprocess
-import torchSB3.env.RLteacherWrapper as RLteacherEnv
+from torchSB3.env import RLteacherWrapper
 
 def train_SB3(
         env_id,
@@ -22,7 +22,7 @@ def train_SB3(
     # TODO: create environment
     model = getattr(SB3, algorithm)(
         "MlpPolicy", # TODO: custom model available
-        RLteacherEnv(make_env(env_id), predictor),
+        RLteacherWrapper(make_env(env_id), predictor),
         verbose=1)
     
     model.learn(total_timesteps=total_timesteps)
