@@ -11,6 +11,7 @@ import tensorflow as tf
 from keras import backend as K
 from parallel_trpo.train import train_parallel_trpo
 from pposgd_mpi.run_mujoco import train_pposgd_mpi
+from torchSB3.train import train_SB3
 
 from rl_teacher.comparison_collectors import SyntheticComparisonCollector, HumanComparisonCollector
 from rl_teacher.envs import get_timesteps_per_episode
@@ -138,6 +139,15 @@ class ComparisonRewardPredictor():
             q_value = self.sess.run(self.q_value, feed_dict={
                 self.segment_obs_placeholder: np.asarray([path["obs"]]),
                 self.segment_act_placeholder: np.asarray([path["actions"]]),
+                K.learning_phase(): False
+            })
+        return q_value[0]
+
+    def predict_reward_from_pair(self, obs, action):
+        with self.graph.as_default():
+            q_value = self.sess.run(self.q_value, feed_dict={
+                self.segment_obs_placeholder: np.asarray(obs),
+                self.segment_act_placeholder: np.asarray(action),
                 K.learning_phase(): False
             })
         return q_value[0]
@@ -323,6 +333,14 @@ def main():
             return make_with_torque_removed(env_id)
 
         train_pposgd_mpi(make_env, num_timesteps=num_timesteps, seed=args.seed, predictor=predictor)
+    
+    elif "torchSB3" in args.agent:
+        train_SB3(
+            env_id=env_id,
+            algorithm=args.agent.strip("torchSB3"),
+            predictor=predictor,
+            workers=args.workers,
+            total_timesteps=num_timesteps)
     else:
         raise ValueError("%s is not a valid choice for args.agent" % args.agent)
 
