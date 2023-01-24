@@ -270,10 +270,13 @@ def main():
             comparison_collector = SyntheticComparisonCollector()
 
         elif args.predictor == "human":
-            os.environ['RL_TEACHER_GCS_BUCKET'] = args.bucket
-            bucket = os.environ.get('RL_TEACHER_GCS_BUCKET')
-            assert bucket and bucket.startswith("gs://"), "argument bucket must start with gs://"
-            comparison_collector = HumanComparisonCollector(env_id, experiment_name=experiment_name)
+            if args.bucket == "local":
+                comparison_collector = HumanComparisonCollector(env_id, experiment_name=experiment_name, local=True)
+            else:    
+                os.environ['RL_TEACHER_GCS_BUCKET'] = args.bucket
+                bucket = os.environ.get('RL_TEACHER_GCS_BUCKET')
+                assert bucket and bucket.startswith("gs://"), "argument bucket must start with gs://"
+                comparison_collector = HumanComparisonCollector(env_id, experiment_name=experiment_name)
         else:
             raise ValueError("Bad value for --predictor: %s" % args.predictor)
 
